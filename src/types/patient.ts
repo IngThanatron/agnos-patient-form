@@ -25,14 +25,3 @@ export interface PatientSession {
   submittedAt?: string;
   createdAt: string;
 }
-
-// Supabase table row shape
-export interface PatientSessionRow {
-  id: string;
-  session_id: string;
-  status: PatientStatus;
-  form_data: Partial<PatientFormData>;
-  last_activity: string;
-  submitted_at: string | null;
-  created_at: string;
-}

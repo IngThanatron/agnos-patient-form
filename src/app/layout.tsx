@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
-import { link } from "fs/promises";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -19,9 +18,6 @@ const dmSerif = DM_Serif_Display({
 export const metadata: Metadata = {
   title: "Agnos Patient Registration",
   description: "Real-time patient registration with live staff monitoring",
-  icons: {
-    icon: "https://www.agnoshealth.com/favicon.ico",
-  },
 };
 
 export default function RootLayout({

@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { PatientSession, PatientSessionRow } from "@/types/patient";
+import type { PatientSession } from "@/types/patient";
+import type { SessionRow } from "@/lib/supabase";
 
-function rowToSession(row: PatientSessionRow): PatientSession {
+function rowToSession(row: SessionRow): PatientSession {
   return {
     id: row.id,
     sessionId: row.session_id,
     status: row.status,
-    formData: row.form_data,
+    formData: row.form_data as PatientSession["formData"],
     lastActivity: row.last_activity,
     submittedAt: row.submitted_at ?? undefined,
     createdAt: row.created_at,
@@ -35,7 +36,7 @@ export function useStaffView() {
         return;
       }
 
-      setSessions((data as PatientSessionRow[]).map(rowToSession));
+      setSessions((data as SessionRow[]).map(rowToSession));
     }
 
     loadSessions();
@@ -53,7 +54,7 @@ export function useStaffView() {
           table: "patient_sessions",
         },
         (payload) => {
-          const updated = rowToSession(payload.new as PatientSessionRow);
+          const updated = rowToSession(payload.new as SessionRow);
 
           setSessions((prev) => {
             const idx = prev.findIndex((s) => s.sessionId === updated.sessionId);

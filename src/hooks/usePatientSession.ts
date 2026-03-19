@@ -26,7 +26,6 @@ export function usePatientSession() {
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialized = useRef(false);
 
-  // Upsert session on mount
   useEffect(() => {
     if (isInitialized.current) return;
     isInitialized.current = true;
@@ -38,9 +37,11 @@ export function usePatientSession() {
           status: "idle",
           form_data: {},
           last_activity: new Date().toISOString(),
+          submitted_at: null,
         },
-        { onConflict: "session_id" }
+        { onConflict: "session_id" },
       );
+
       if (error) setError("Could not start session. Check Supabase config.");
     }
 
@@ -50,35 +51,35 @@ export function usePatientSession() {
   const updateFormData = useCallback(
     async (formData: Partial<PatientFormData>) => {
       setIsSyncing(true);
-
-      // Debounce: clear idle timer
       if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
-
       setStatus("typing");
 
       const { error } = await supabase.from("patient_sessions").upsert(
         {
           session_id: sessionId,
           status: "typing",
-          form_data: formData,
+          form_data: formData as unknown as Record<string, unknown>,
           last_activity: new Date().toISOString(),
+          submitted_at: null,
         },
-        { onConflict: "session_id" }
+        { onConflict: "session_id" },
       );
 
       setIsSyncing(false);
       if (error) setError("Sync error. Changes may not be visible to staff.");
 
-      // Reset to idle after 2s of inactivity
       typingTimerRef.current = setTimeout(async () => {
         setStatus("idle");
         await supabase
           .from("patient_sessions")
-          .update({ status: "idle", last_activity: new Date().toISOString() })
+          .update({
+            status: "idle",
+            last_activity: new Date().toISOString(),
+          })
           .eq("session_id", sessionId);
       }, 2000);
     },
-    [sessionId]
+    [sessionId],
   );
 
   const submitForm = useCallback(
@@ -90,11 +91,11 @@ export function usePatientSession() {
         {
           session_id: sessionId,
           status: "submitted",
-          form_data: formData,
+          form_data: formData as unknown as Record<string, unknown>,
           last_activity: new Date().toISOString(),
           submitted_at: new Date().toISOString(),
         },
-        { onConflict: "session_id" }
+        { onConflict: "session_id" },
       );
 
       setIsSyncing(false);
@@ -106,7 +107,7 @@ export function usePatientSession() {
       setStatus("submitted");
       return true;
     },
-    [sessionId]
+    [sessionId],
   );
 
   return { sessionId, status, isSyncing, error, updateFormData, submitForm };
