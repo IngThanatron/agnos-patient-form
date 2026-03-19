@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-dm-sans: "DM Sans", system-ui, sans-serif;
+  --font-dm-serif: "DM Serif Display", Georgia, serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-dm-sans);
+  }
+}
+
+@layer components {
+  .form-input {
+    @apply w-full h-10 px-3 text-sm border border-clinical-border rounded-lg
+           bg-white text-clinical-text placeholder:text-clinical-muted
+           focus:outline-none focus:ring-2 focus:ring-clinical-blue focus:border-transparent
+           transition-all duration-150;
+  }
+
+  .form-input.error {
+    @apply border-clinical-red focus:ring-clinical-red;
+  }
+
+  .form-select {
+    @apply form-input appearance-none cursor-pointer bg-no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 12px center;
+    padding-right: 2.5rem;
+  }
+
+  .form-label {
+    @apply block text-[11px] font-medium tracking-widest uppercase text-clinical-muted mb-1.5;
+  }
+
+  .form-error {
+    @apply text-[11px] text-clinical-red mt-1;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full;
+  }
+
+  .btn-primary {
+    @apply w-full h-10 rounded-lg bg-clinical-blue text-white text-sm font-medium
+           hover:bg-clinical-blue-dark active:scale-[0.99] transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
+
+@layer utilities {
+  .animate-flash-in {
+    animation: flash-in 0.6s ease-out;
+  }
+}
+
+@keyframes flash-in {
+  0% { background-color: #dbeafe; }
+  100% { background-color: transparent; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
