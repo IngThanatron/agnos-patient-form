@@ -4,20 +4,48 @@ Real-time patient input form with live staff monitoring dashboard. Built with **
 
 ## Live Demo
 
-> Deploy to Vercel (see below) and share the `/patient` URL with patients and `/staff` with staff.
+| Role          | URL                                                                                    |
+| ------------- | -------------------------------------------------------------------------------------- |
+| Patient form  | [agnos-patient-form.vercel.app/patient](https://agnos-patient-form.vercel.app/patient) |
+| Staff monitor | [agnos-patient-form.vercel.app/staff](https://agnos-patient-form.vercel.app/staff)     |
+| Home          | [agnos-patient-form.vercel.app](https://agnos-patient-form.vercel.app)                 |
+
+---
+
+## How to Use
+
+### For Patients
+
+1. Open [agnos-patient-form.vercel.app/patient](https://agnos-patient-form.vercel.app/patient) on any device
+2. Fill in your personal details — all fields marked \* are required
+3. Your information syncs to the staff monitor in real-time as you type
+4. Click **Submit Registration** when done — you will see a confirmation screen
+
+### For Staff
+
+1. Open [agnos-patient-form.vercel.app/staff](https://agnos-patient-form.vercel.app/staff) on your workstation
+2. The dashboard updates automatically — no refresh needed
+3. Each patient appears as a card showing:
+   - **Typing...** (blue dot) — patient is actively filling the form
+   - **Idle** (grey dot) — patient has paused
+   - **Submitted** (green dot) — form has been submitted
+4. Fields flash blue as the patient updates them
+5. The progress bar shows how much of the form has been completed
+
+> **Tip:** Open both views side by side in separate browser tabs to see the real-time sync in action.
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router) |
-| Styling | TailwindCSS |
-| Real-time sync | Supabase Realtime (PostgreSQL → WebSocket) |
-| Form validation | React Hook Form + Zod |
-| Fonts | DM Sans + DM Serif Display (Google Fonts) |
-| Hosting | Vercel |
+| Layer           | Technology                                  |
+| --------------- | ------------------------------------------- |
+| Framework       | Next.js 14 (App Router)                     |
+| Styling         | TailwindCSS                                 |
+| Real-time sync  | Supabase Realtime (PostgreSQL to WebSocket) |
+| Form validation | React Hook Form + Zod                       |
+| Fonts           | DM Sans + DM Serif Display (Google Fonts)   |
+| Hosting         | Vercel                                      |
 
 ---
 
@@ -42,7 +70,7 @@ src/
 │   ├── usePatientSession.ts  # Patient-side Supabase upsert + debounce
 │   └── useStaffView.ts       # Staff-side Supabase Realtime subscription
 ├── lib/
-│   ├── supabase.ts           # Supabase client (typed)
+│   ├── supabase.ts           # Supabase client
 │   └── validation.ts         # Zod schema for all form fields
 └── types/
     └── patient.ts            # Shared TypeScript types
@@ -66,7 +94,7 @@ npm install
 
 1. Go to [supabase.com](https://supabase.com) and create a free account
 2. Create a new project
-3. Note your **Project URL** and **Anon Key** (Settings → API)
+3. Note your **Project URL** (Settings → Data API) and **Publishable Key** (Settings → API Keys)
 
 ### 3. Run the Database Schema
 
@@ -74,11 +102,13 @@ npm install
 2. Paste the contents of `supabase/schema.sql` and run it
 3. This creates the `patient_sessions` table and enables Realtime
 
-### 4. Enable Realtime (if not done via SQL)
+### 4. Enable Realtime
 
-In Supabase Dashboard:
-- Go to **Database → Replication**
-- Under "Supabase Realtime", toggle ON for the `patient_sessions` table
+Run this in the SQL Editor if not already applied:
+
+```sql
+alter publication supabase_realtime add table public.patient_sessions;
+```
 
 ### 5. Configure Environment Variables
 
@@ -87,9 +117,10 @@ cp .env.local.example .env.local
 ```
 
 Edit `.env.local`:
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
 ```
 
 ### 6. Run Locally
@@ -99,6 +130,7 @@ npm run dev
 ```
 
 Open:
+
 - [http://localhost:3000/patient](http://localhost:3000/patient) — Patient form
 - [http://localhost:3000/staff](http://localhost:3000/staff) — Staff monitor
 
@@ -106,15 +138,10 @@ Open:
 
 ## Deployment (Vercel)
 
-```bash
-npm install -g vercel
-vercel
-```
-
-Or connect via Vercel dashboard:
-1. Import the GitHub repository
-2. Add environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
-3. Deploy — Vercel auto-detects Next.js
+1. Push to GitHub
+2. Go to [vercel.com](https://vercel.com) and import the repository
+3. Add environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+4. Deploy — Vercel auto-detects Next.js
 
 ---
 
@@ -143,6 +170,7 @@ Staff dashboard updates instantly with flash animation
 ## Features
 
 ### Patient Form
+
 - All required fields with inline validation
 - Real-time sync on every keystroke (debounced)
 - Status indicator: Idle / Typing / Submitted
@@ -150,6 +178,7 @@ Staff dashboard updates instantly with flash animation
 - Success state after submission
 
 ### Staff View
+
 - Live session cards — one per patient
 - Per-field flash animation on update
 - Progress bar showing form completion %
@@ -158,8 +187,9 @@ Staff dashboard updates instantly with flash animation
 - Connection indicator (Live / Connecting)
 
 ### Bonus Features
+
 - Session persistence via `sessionStorage` (patient can refresh without losing session)
-- Typed Supabase client (full TypeScript)
+- Full TypeScript
 - Zod validation with custom error messages
 - Zero server-side API routes needed
 
@@ -170,29 +200,32 @@ Staff dashboard updates instantly with flash animation
 ### Design Decisions
 
 **Why Supabase Realtime over raw WebSockets?**
+
 - No backend server to deploy or maintain
 - PostgreSQL row-level events = data is automatically persisted
 - Free tier sufficient for the assignment scale
-- Typed client with great Next.js/React integration
+- Great Next.js/React integration
 
 **Why React Hook Form + Zod?**
+
 - Minimal re-renders (uncontrolled inputs)
 - Schema-based validation is reusable and testable
 - Type inference from schema to form values
 
 **Responsive approach**
+
 - Single-column on mobile, multi-column grid on tablet/desktop
 - Tailwind breakpoints: `sm:` at 640px for form column splits
 - Staff cards: 1 column → 2 → 3 at sm/lg breakpoints
 
 ### Component Architecture
 
-| Component | Purpose |
-|---|---|
-| `usePatientSession` | Manages session ID, debounces Supabase writes, handles submit |
-| `useStaffView` | Loads initial sessions, subscribes to Realtime channel |
-| `StatusIndicator` | Reusable badge used in both patient header and staff cards |
-| `SessionCard` | Staff-side card with `FlashValue` subcomponent for update animations |
+| Component           | Purpose                                                              |
+| ------------------- | -------------------------------------------------------------------- |
+| `usePatientSession` | Manages session ID, debounces Supabase writes, handles submit        |
+| `useStaffView`      | Loads initial sessions, subscribes to Realtime channel               |
+| `StatusIndicator`   | Reusable badge used in both patient header and staff cards           |
+| `SessionCard`       | Staff-side card with `FlashValue` subcomponent for update animations |
 
 ---
 
